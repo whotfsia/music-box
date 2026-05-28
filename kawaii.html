@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✿ Box Player ✿</title>
+
+  <!-- Google Fonts: Nunito (body) + Fredoka One (headings) + VT323 (pixel accents) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=VT323&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="kawaii.css" />
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════
+       ANIMATED BACKGROUND CANVAS
+       Floating hearts/sparkles drawn by script.js
+  ═════════════════════════════════════════════ -->
+  <canvas id="bgCanvas" aria-hidden="true"></canvas>
+
+  <!-- ════════════════════════════════════════════
+       MAIN APP WRAPPER
+       The draggable player card lives here
+  ═════════════════════════════════════════════ -->
+  <div class="app-wrapper">
+
+    <!-- ── PLAYER CARD (draggable) ─────────────── -->
+    <div class="player-card" id="playerCard">
+
+      <!-- Drag handle bar (click+hold to drag) -->
+      <div class="drag-handle" id="dragHandle" title="Drag me!">
+        <div class="drag-dots">
+          <span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+        </div>
+        <!-- Decorative pixel star top-right -->
+        <span class="pixel-star" aria-hidden="true">✦</span>
+      </div>
+
+      <!-- ── ALBUM ART ──────────────────────────── -->
+      <div class="album-section">
+
+        <!-- Outer glowing ring -->
+        <div class="album-ring" id="albumRing">
+
+          <!-- Inner circle with pixel art cover -->
+          <div class="album-art" id="albumArt">
+            <!-- SVG pixel art album covers are swapped by JS -->
+            <img
+              id="albumImg"
+              src="image/anime1.jpeg"
+              alt=""
+              style="display: block;" width="100%" height="100%" object-fit="cover" border-radius="50%"
+            />
+            <!-- Pixel overlay shimmer -->
+            <div class="album-shimmer" aria-hidden="true"></div>
+          </div>
+
+        </div>
+
+        <!-- Floating badge showing current track number -->
+        <div class="track-badge" id="trackBadge" aria-label="Track number">
+          <span class="pixel-font" id="trackNumDisplay">01</span>
+          <span class="track-badge__of">/ <span id="trackTotalDisplay">04</span></span>
+        </div>
+
+      </div>
+
+      <div class="song-info" role="region" aria-label="Now playing">
+        <div class="song-info__now">✦ now playing ✦</div>
+        <h2 class="song-title" id="songTitle">Sakura Dream</h2>
+        <p class="song-artist" id="songArtist">Yume Collective</p>
+
+        <span class="genre-pill" id="genrePill">lo-fi</span>
+      </div>
+
+      <!-- ── PROGRESS BAR ────────────────────────── -->
+      <div class="progress-section" role="region" aria-label="Playback progress">
+        <div class="time-row">
+          <span class="time-label" id="currentTime">0:00</span>
+          <span class="time-label" id="totalTime">0:00</span>
+        </div>
+        <!-- Range input styled as pastel progress bar -->
+        <input
+          type="range"
+          id="progressBar"
+          class="progress-bar"
+          min="0"
+          max="100"
+          value="0"
+          step="0.1"
+          aria-label="Seek position"
+        />
+      </div>
+
+      <!-- ── CONTROLS ────────────────────────────── -->
+      <div class="controls" role="group" aria-label="Playback controls">
+
+        <!-- Shuffle -->
+        <button class="ctrl-btn ctrl-btn--sm" id="shuffleBtn" aria-label="Toggle shuffle" title="Shuffle">
+          ⇄
+        </button>
+
+        <!-- Previous -->
+        <button class="ctrl-btn ctrl-btn--md" id="prevBtn" aria-label="Previous track">
+          ◂◂
+        </button>
+
+        <!-- Play / Pause — large central button -->
+        <button class="ctrl-btn ctrl-btn--play" id="playBtn" aria-label="Play or pause">
+          <span id="playIcon" aria-hidden="true">▶</span>
+        </button>
+
+        <!-- Next -->
+        <button class="ctrl-btn ctrl-btn--md" id="nextBtn" aria-label="Next track">
+          ▸▸
+        </button>
+
+        <!-- Favorite / Heart -->
+        <button class="ctrl-btn ctrl-btn--sm ctrl-btn--heart" id="heartBtn" aria-label="Toggle favorite" title="Favorite">
+          ♡
+        </button>
+
+      </div>
+
+      <!-- ── VOLUME ──────────────────────────────── -->
+      <div class="volume-section" role="group" aria-label="Volume control">
+        <span class="vol-icon" aria-hidden="true" id="volIcon">🔊</span>
+        <input
+          type="range"
+          id="volumeBar"
+          class="volume-bar"
+          min="0"
+          max="1"
+          step="0.01"
+          value="0.75"
+          aria-label="Volume"
+        />
+        <span class="vol-pct" id="volPct">75%</span>
+      </div>
+
+      <!-- ── PIXELATED MINI VISUALISER ─────────────
+           8 bars animated by CSS; intensity driven by JS class toggling -->
+      <div class="visualiser" id="visualiser" aria-hidden="true">
+        <div class="vis-bar"></div>
+        <div class="vis-bar"></div>
+        <div class="vis-bar"></div>
+        <div class="vis-bar"></div>
+        <div class="vis-bar"></div>
+        <div class="vis-bar"></div>
+        <div class="vis-bar"></div>
+        <div class="vis-bar"></div>
+      </div>
+
+    </div><!-- /player-card -->
+
+    <!-- ── PLAYLIST PANEL ──────────────────────── -->
+    <div class="playlist-panel" id="playlistPanel" role="region" aria-label="Playlist">
+
+      <div class="playlist-header">
+        <h3 class="playlist-title pixel-font">✿ playlist ✿</h3>
+        <span class="playlist-count" id="playlistCount">4 tracks</span>
+      </div>
+
+      <!-- Scrollable list of songs -->
+      <ul class="playlist" id="playlistEl" role="list">
+        <!-- Items injected by script.js -->
+      </ul>
+
+      <!-- Decorative pixel art divider -->
+      <div class="playlist-footer pixel-font" aria-hidden="true">
+        · · · ✦ · · ·
+      </div>
+
+    </div><!-- /playlist-panel -->
+
+  </div><!-- /app-wrapper -->
+
+  <!-- Hidden audio element — actual audio playback -->
+  <!--
+    NOTE: No real audio files are bundled.
+    Replace `src` values in the SONGS array inside script.js
+    with paths to your own .mp3 / .ogg files.
+    The player will still render and animate with placeholder tracks.
+  -->
+  <audio id="audioEl" preload="metadata"></audio>
+
+<script src="kawaii (1).js"></script>
+</body>
+</html>
